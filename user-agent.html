@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Agent Identifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #5568d3;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .user-agent-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .user-agent-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .user-agent-display {
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            border-radius: 6px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .details {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            text-align: right;
+            max-width: 300px;
+            word-break: break-word;
+        }
+
+        .copy-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .info-section {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .info-section h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #10b981;
+        }
+
+        .info-item-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-item-value {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        
+        <h1>User Agent Identifier</h1>
+        <p class="subtitle">Identify your browser, OS, and device information</p>
+
+        <div class="user-agent-box">
+            <div class="user-agent-label">Your User Agent String</div>
+            <div class="user-agent-display" id="userAgentDisplay">-</div>
+            <button class="copy-btn" onclick="copyUserAgent()" id="copyBtn">Copy User Agent</button>
+        </div>
+
+        <div class="details">
+            <div class="detail-item">
+                <span class="detail-label">Browser:</span>
+                <span class="detail-value" id="browserName">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Browser Version:</span>
+                <span class="detail-value" id="browserVersion">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Operating System:</span>
+                <span class="detail-value" id="osName">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">OS Version:</span>
+                <span class="detail-value" id="osVersion">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Device Type:</span>
+                <span class="detail-value" id="deviceType">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Device Model:</span>
+                <span class="detail-value" id="deviceModel">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Engine:</span>
+                <span class="detail-value" id="engine">-</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>📊 Additional Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-item-label">Screen Resolution</div>
+                    <div class="info-item-value" id="screenResolution">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Color Depth</div>
+                    <div class="info-item-value" id="colorDepth">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Time Zone</div>
+                    <div class="info-item-value" id="timezone">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Language</div>
+                    <div class="info-item-value" id="language">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">JavaScript</div>
+                    <div class="info-item-value">Enabled</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Cookies</div>
+                    <div class="info-item-value" id="cookies">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback">✓ Copied to clipboard!</div>
+    </div>
+
+    <script>
+        function parseUserAgent() {
+            const ua = navigator.userAgent;
+            document.getElementById('userAgentDisplay').textContent = ua;
+
+            // Browser detection
+            let browserName = 'Unknown';
+            let browserVersion = 'Unknown';
+
+            if (ua.indexOf('Edg') > -1) {
+                browserName = 'Microsoft Edge';
+                browserVersion = ua.split('Edg/')[1].split(' ')[0];
+            } else if (ua.indexOf('Chrome') > -1 && ua.indexOf('Chromium') === -1) {
+                browserName = 'Google Chrome';
+                browserVersion = ua.split('Chrome/')[1].split(' ')[0];
+            } else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) {
+                browserName = 'Safari';
+                browserVersion = ua.split('Version/')[1].split(' ')[0];
+            } else if (ua.indexOf('Firefox') > -1) {
+                browserName = 'Mozilla Firefox';
+                browserVersion = ua.split('Firefox/')[1].split(' ')[0];
+            } else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) {
+                browserName = 'Opera';
+                browserVersion = ua.split('OPR/')[1].split(' ')[0] || ua.split('Opera/')[1].split(' ')[0];
+            } else if (ua.indexOf('Trident') > -1) {
+                browserName = 'Internet Explorer';
+                browserVersion = ua.split('rv:')[1].split(')')[0];
+            }
+
+            // OS detection
+            let osName = 'Unknown';
+            let osVersion = 'Unknown';
+
+            if (ua.indexOf('Windows') > -1) {
+                osName = 'Windows';
+                if (ua.indexOf('Windows NT 10.0') > -1) osVersion = '10 or 11';
+                else if (ua.indexOf('Windows NT 6.3') > -1) osVersion = '8.1';
+                else if (ua.indexOf('Windows NT 6.2') > -1) osVersion = '8';
+                else if (ua.indexOf('Windows NT 6.1') > -1) osVersion = '7';
+            } else if (ua.indexOf('Mac') > -1) {
+                osName = 'macOS';
+                const match = ua.match(/Mac OS X ([\d_]+)/);
+                if (match) osVersion = match[1].replace(/_/g, '.');
+            } else if (ua.indexOf('Linux') > -1) {
+                osName = 'Linux';
+            } else if (ua.indexOf('iPad') > -1) {
+                osName = 'iPadOS';
+                const match = ua.match(/Version\/([\d.]+)/);
+                if (match) osVersion = match[1];
+            } else if (ua.indexOf('iPhone') > -1) {
+                osName = 'iOS';
+                const match = ua.match(/Version\/([\d.]+)/);
+                if (match) osVersion = match[1];
+            } else if (ua.indexOf('Android') > -1) {
+                osName = 'Android';
+                const match = ua.match(/Android ([\d.]+)/);
+                if (match) osVersion = match[1];
+            }
+
+            // Device detection
+            let deviceType = 'Desktop';
+            let deviceModel = 'Unknown';
+
+            if (ua.indexOf('Mobile') > -1 || ua.indexOf('Android') > -1) {
+                deviceType = 'Mobile';
+            } else if (ua.indexOf('Tablet') > -1 || ua.indexOf('iPad') > -1) {
+                deviceType = 'Tablet';
+            }
+
+            if (ua.indexOf('iPhone') > -1) {
+                deviceModel = 'iPhone';
+            } else if (ua.indexOf('iPad') > -1) {
+                deviceModel = 'iPad';
+            } else if (ua.indexOf('Android') > -1) {
+                deviceModel = 'Android Device';
+            }
+
+            // Engine detection
+            let engine = 'Unknown';
+            if (ua.indexOf('Gecko') > -1) engine = 'Gecko';
+            if (ua.indexOf('WebKit') > -1) engine = 'WebKit';
+            if (ua.indexOf('Blink') > -1) engine = 'Blink';
+            if (ua.indexOf('Trident') > -1) engine = 'Trident';
+
+            // Display results
+            document.getElementById('browserName').textContent = browserName;
+            document.getElementById('browserVersion').textContent = browserVersion;
+            document.getElementById('osName').textContent = osName;
+            document.getElementById('osVersion').textContent = osVersion;
+            document.getElementById('deviceType').textContent = deviceType;
+            document.getElementById('deviceModel').textContent = deviceModel;
+            document.getElementById('engine').textContent = engine;
+
+            // Additional info
+            document.getElementById('screenResolution').textContent = window.screen.width + ' × ' + window.screen.height;
+            document.getElementById('colorDepth').textContent = window.screen.colorDepth + ' bits';
+            document.getElementById('timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('language').textContent = navigator.language || 'Unknown';
+            document.getElementById('cookies').textContent = navigator.cookieEnabled ? 'Enabled' : 'Disabled';
+        }
+
+        function copyUserAgent() {
+            const ua = navigator.userAgent;
+            navigator.clipboard.writeText(ua).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                
+                document.getElementById('feedback').classList.add('show');
+                
+                setTimeout(() => {
+                    btn.textContent = 'Copy User Agent';
+                    btn.classList.remove('copied');
+                    document.getElementById('feedback').classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy to clipboard');
+                console.error(err);
+            });
+        }
+
+        // Parse on page load
+        window.addEventListener('load', parseUserAgent);
+    </script>
+</body>
+</html>

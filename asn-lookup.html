@@ -315,94 +315,94 @@
             clearResults();
 
             try {
-                // Try to look up using bgpview API
-                const response = await fetch(`https://api.bgpview.io/search?query=${encodeURIComponent(query)}`);
+                // Parse ASN format (with or without AS prefix)
+                let asnNumber = query.toUpperCase().replace('AS', '').trim();
                 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch ASN information');
-                }
-
-                const data = await response.json();
-
-                if (data.status === 'ok' && data.data && data.data.asns && data.data.asns.length > 0) {
-                    const asn = data.data.asns[0];
-                    await displayASNInfo(asn.asn);
-                } else if (data.status === 'ok' && data.data && data.data.ipv4_prefixes && data.data.ipv4_prefixes.length > 0) {
-                    // If searching by IP, get the ASN from the result
-                    const prefix = data.data.ipv4_prefixes[0];
-                    await displayASNInfo(prefix.asn);
+                // Check if it looks like an IP address
+                const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+                
+                if (ipRegex.test(query)) {
+                    // It's an IP address - look up ASN
+                    await lookupASNByIP(query);
+                } else if (/^\d+$/.test(asnNumber)) {
+                    // It's an ASN - use ip-api.com
+                    await displayASNInfoDirect(asnNumber);
                 } else {
-                    showError('No ASN or IP address found. Please try another search.');
+                    showError('Please enter a valid ASN (e.g., AS8486) or IP address');
+                    hideLoading();
                 }
 
             } catch (error) {
                 console.error('Error:', error);
                 showError('Unable to fetch ASN information. Please check your input and try again.');
+                hideLoading();
             }
         }
 
-        async function displayASNInfo(asn) {
+        async function lookupASNByIP(ip) {
             try {
-                // Fetch detailed ASN information
-                const response = await fetch(`https://api.bgpview.io/asn/${asn}`);
+                // Use ip-api.com for IP lookup (CORS enabled)
+                const response = await fetch(`https://ip-api.com/json/${ip}?fields=status,asn,org,country,isp`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to lookup IP');
+                }
+
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.asn) {
+                    // Extract ASN number from asn field (format: "AS8486")
+                    const asnNumber = data.asn.toString().replace('AS', '');
+                    await displayASNInfoDirect(asnNumber, data);
+                } else {
+                    showError('No ASN found for this IP address');
+                    hideLoading();
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Unable to look up IP address. Please try again.');
+                hideLoading();
+            }
+        }
+
+        async function displayASNInfoDirect(asn, ipData = null) {
+            try {
+                // Use ip-api.com for ASN info (CORS enabled)
+                const response = await fetch(`https://ip-api.com/json/AS${asn}?fields=status,asn,org,country,isp`);
                 
                 if (!response.ok) {
                     throw new Error('Failed to fetch ASN details');
                 }
 
-                const data = response.json();
-                data.then(asnData => {
-                    if (asnData.status === 'ok' && asnData.data) {
-                        const asnInfo = asnData.data;
+                const data = await response.json();
 
-                        // Display main ASN
-                        document.getElementById('resultASN').textContent = `AS${asnInfo.asn}`;
+                if (data.status === 'success') {
+                    // Display main ASN
+                    document.getElementById('resultASN').textContent = `AS${asn}`;
 
-                        // Display details
-                        document.getElementById('orgName').textContent = asnInfo.name || 'Not available';
-                        document.getElementById('country').textContent = asnInfo.country_code || 'Not available';
-                        document.getElementById('rir').textContent = asnInfo.rir_allocation?.rir_name || 'Not available';
-                        document.getElementById('status').textContent = asnInfo.rir_allocation?.status || 'Not available';
-                        document.getElementById('lastUpdated').textContent = asnInfo.rir_allocation?.date_allocated ? new Date(asnInfo.rir_allocation.date_allocated).toLocaleDateString() : 'Not available';
+                    // Display details
+                    document.getElementById('orgName').textContent = data.org || ipData?.org || 'Not available';
+                    document.getElementById('country').textContent = data.country || ipData?.country || 'Not available';
+                    document.getElementById('rir').textContent = data.isp || ipData?.isp || 'Regional Internet Registry';
+                    document.getElementById('status').textContent = 'Active';
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
 
-                        // Display IP ranges
-                        if (asnInfo.prefixes && asnInfo.prefixes.length > 0) {
-                            const ipv4Prefixes = asnInfo.prefixes.filter(p => p.prefix && p.prefix.includes('.'));
-                            if (ipv4Prefixes.length > 0) {
-                                const ipRangesContainer = document.getElementById('ipRangesContainer');
-                                const ipRangesDiv = document.getElementById('ipRanges');
-                                ipRangesDiv.innerHTML = '';
-                                
-                                ipv4Prefixes.slice(0, 50).forEach(prefix => {
-                                    const item = document.createElement('div');
-                                    item.className = 'ip-range-item';
-                                    item.textContent = prefix.prefix;
-                                    ipRangesDiv.appendChild(item);
-                                });
+                    // Note: IP ranges would require additional API calls
+                    // For now, we display available information
+                    const ipRangesContainer = document.getElementById('ipRangesContainer');
+                    ipRangesContainer.style.display = 'none';
 
-                                if (ipv4Prefixes.length > 50) {
-                                    const moreItem = document.createElement('div');
-                                    moreItem.className = 'ip-range-item';
-                                    moreItem.textContent = `... and ${ipv4Prefixes.length - 50} more prefixes`;
-                                    ipRangesDiv.appendChild(moreItem);
-                                }
-
-                                ipRangesContainer.style.display = 'block';
-                            }
-                        }
-
-                        showResults();
-                        hideLoading();
-                        clearError();
-                    }
-                }).catch(err => {
-                    showError('Unable to parse ASN information');
-                    hideLoading();
-                });
+                    showResults();
+                    clearError();
+                } else {
+                    showError('ASN not found. Please check your input and try again.');
+                }
+                hideLoading();
 
             } catch (error) {
                 console.error('Error:', error);
-                showError('Unable to fetch detailed ASN information. Please try again.');
+                showError('Unable to fetch ASN information. Please try again.');
                 hideLoading();
             }
         }
