@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Binary Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #5568d3;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .converter-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .output-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            min-height: 100px;
+            word-break: break-all;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .output-box.empty {
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .copy-output {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-output:hover {
+            background: white;
+            color: #10b981;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .convert-btn {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .clear-btn {
+            padding: 12px 20px;
+            background: #e5e7eb;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #d1d5db;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+            margin: 30px 0;
+        }
+
+        .char-count {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #f3f4f6;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 12px;
+            color: #10b981;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        
+        <h1>Text ↔ Binary Converter</h1>
+        <p class="subtitle">Convert between text and binary representations</p>
+
+        <div class="info-text">
+            💡 Convert text to binary (UTF-8 encoded) or binary back to text. Each character is represented as 8-bit binary code.
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('textToBinary')">Text to Binary</button>
+            <button class="tab-btn" onclick="switchTab('binaryToText')">Binary to Text</button>
+        </div>
+
+        <!-- Text to Binary Tab -->
+        <div id="textToBinaryTab" class="tab-content active">
+            <div class="converter-section">
+                <div class="section-title">
+                    <span class="section-icon">📝</span>
+                    Text Input
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Enter Text</label>
+                    <textarea class="input-box" id="textInput" placeholder="Enter text here..." oninput="convertTextToBinary()"></textarea>
+                    <div class="char-count"><span id="textCharCount">0</span> characters</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="convert-btn" onclick="convertTextToBinary()">Convert to Binary</button>
+                <button class="clear-btn" onclick="clearTextToBinary()">Clear</button>
+            </div>
+
+            <div class="converter-section" style="margin-top: 25px;">
+                <div class="section-title">
+                    <span class="section-icon">🔢</span>
+                    Binary Output
+                </div>
+                <div class="output-box empty" id="binaryOutput">
+                    Binary output will appear here
+                    <button class="copy-output" onclick="copyBinary()" id="copyBinaryBtn">Copy</button>
+                </div>
+                <div class="char-count"><span id="binaryCharCount">0</span> bits</div>
+            </div>
+        </div>
+
+        <!-- Binary to Text Tab -->
+        <div id="binaryToTextTab" class="tab-content">
+            <div class="converter-section">
+                <div class="section-title">
+                    <span class="section-icon">🔢</span>
+                    Binary Input
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Enter Binary (space or comma separated)</label>
+                    <textarea class="input-box" id="binaryInput" placeholder="Enter binary here (e.g., 01001000 01100101 01101100 01101100 01101111)..." oninput="convertBinaryToText()"></textarea>
+                    <div class="char-count"><span id="binaryInputCharCount">0</span> bits</div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="convert-btn" onclick="convertBinaryToText()">Convert to Text</button>
+                <button class="clear-btn" onclick="clearBinaryToText()">Clear</button>
+            </div>
+
+            <div class="converter-section" style="margin-top: 25px;">
+                <div class="section-title">
+                    <span class="section-icon">📝</span>
+                    Text Output
+                </div>
+                <div class="output-box empty" id="textOutput">
+                    Text output will appear here
+                    <button class="copy-output" onclick="copyText()" id="copyTextBtn">Copy</button>
+                </div>
+                <div class="char-count"><span id="textOutputCharCount">0</span> characters</div>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback">✓ Copied to clipboard!</div>
+    </div>
+
+    <script>
+        // Text to Binary conversion
+        function convertTextToBinary() {
+            const text = document.getElementById('textInput').value;
+            document.getElementById('textCharCount').textContent = text.length;
+
+            if (!text) {
+                document.getElementById('binaryOutput').classList.add('empty');
+                document.getElementById('binaryOutput').textContent = 'Binary output will appear here';
+                document.getElementById('binaryCharCount').textContent = '0';
+                return;
+            }
+
+            let binary = '';
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i);
+                const binaryChar = charCode.toString(2).padStart(8, '0');
+                binary += binaryChar + ' ';
+            }
+
+            binary = binary.trim();
+            document.getElementById('binaryOutput').classList.remove('empty');
+            document.getElementById('binaryOutput').textContent = binary;
+            document.getElementById('binaryCharCount').textContent = binary.replace(/\s/g, '').length;
+        }
+
+        // Binary to Text conversion
+        function convertBinaryToText() {
+            const binary = document.getElementById('binaryInput').value.trim();
+            const binaryInputCount = binary.replace(/\s/g, '').length;
+            document.getElementById('binaryInputCharCount').textContent = binaryInputCount;
+
+            if (!binary) {
+                document.getElementById('textOutput').classList.add('empty');
+                document.getElementById('textOutput').textContent = 'Text output will appear here';
+                document.getElementById('textOutputCharCount').textContent = '0';
+                return;
+            }
+
+            try {
+                // Split by spaces or commas
+                const binaryArray = binary.split(/[\s,]+/).filter(b => b.length > 0);
+                let text = '';
+
+                for (let i = 0; i < binaryArray.length; i++) {
+                    const byte = binaryArray[i];
+                    
+                    // Validate binary format
+                    if (!/^[01]+$/.test(byte)) {
+                        throw new Error('Invalid binary format');
+                    }
+
+                    // Convert 8-bit or variable length
+                    const charCode = parseInt(byte, 2);
+                    text += String.fromCharCode(charCode);
+                }
+
+                document.getElementById('textOutput').classList.remove('empty');
+                document.getElementById('textOutput').textContent = text;
+                document.getElementById('textOutputCharCount').textContent = text.length;
+            } catch (error) {
+                document.getElementById('textOutput').classList.add('empty');
+                document.getElementById('textOutput').textContent = '⚠️ Invalid binary format. Use space or comma separated 8-bit values.';
+                document.getElementById('textOutputCharCount').textContent = '0';
+            }
+        }
+
+        // Copy functions
+        function copyBinary() {
+            const binary = document.getElementById('binaryOutput').textContent;
+            if (binary === 'Binary output will appear here') return;
+            copyToClipboard(binary);
+        }
+
+        function copyText() {
+            const text = document.getElementById('textOutput').textContent;
+            if (text === 'Text output will appear here') return;
+            copyToClipboard(text);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const feedback = document.getElementById('feedback');
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy to clipboard');
+                console.error(err);
+            });
+        }
+
+        // Clear functions
+        function clearTextToBinary() {
+            document.getElementById('textInput').value = '';
+            document.getElementById('binaryOutput').classList.add('empty');
+            document.getElementById('binaryOutput').textContent = 'Binary output will appear here';
+            document.getElementById('textCharCount').textContent = '0';
+            document.getElementById('binaryCharCount').textContent = '0';
+        }
+
+        function clearBinaryToText() {
+            document.getElementById('binaryInput').value = '';
+            document.getElementById('textOutput').classList.add('empty');
+            document.getElementById('textOutput').textContent = 'Text output will appear here';
+            document.getElementById('binaryInputCharCount').textContent = '0';
+            document.getElementById('textOutputCharCount').textContent = '0';
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            if (tab === 'textToBinary') {
+                document.getElementById('textToBinaryTab').classList.add('active');
+            } else {
+                document.getElementById('binaryToTextTab').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
