@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASN Lookup Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #5568d3;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 22px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .details {
+            display: none;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .details.show {
+            display: block;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            text-align: right;
+            max-width: 300px;
+            word-break: break-word;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .info-text {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .ip-ranges {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .ip-range-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: white;
+            border-left: 3px solid #10b981;
+            padding-left: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        
+        <h1>ASN Lookup Tool</h1>
+        <p class="subtitle">Find information about Autonomous System Numbers</p>
+
+        <div class="info-text">
+            💡 Enter an ASN (e.g., AS8486) or an IP address to look up Autonomous System information including organization name, country, and IP ranges.
+        </div>
+
+        <div class="search-box">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="Enter ASN (e.g., AS8486) or IP address..." 
+                onkeypress="if(event.key === 'Enter') searchASN()"
+            >
+            <button class="search-btn" onclick="searchASN()">Search</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Looking up ASN information...</p>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <div class="result-label">Autonomous System Number</div>
+            <div class="result-value" id="resultASN">-</div>
+        </div>
+
+        <div class="details" id="details">
+            <div class="detail-item">
+                <span class="detail-label">Organization:</span>
+                <span class="detail-value" id="orgName">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Country:</span>
+                <span class="detail-value" id="country">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">RIR:</span>
+                <span class="detail-value" id="rir">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" id="status">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Last Updated:</span>
+                <span class="detail-value" id="lastUpdated">-</span>
+            </div>
+        </div>
+
+        <div id="ipRangesContainer" style="display: none; margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb;">
+            <h3 style="color: #333; font-size: 16px; margin-bottom: 12px;">IP Ranges (IPv4)</h3>
+            <div class="ip-ranges" id="ipRanges"></div>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        async function searchASN() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput.value.trim();
+
+            if (!query) {
+                showError('Please enter an ASN or IP address');
+                return;
+            }
+
+            showLoading();
+            clearResults();
+
+            try {
+                // Try to look up using bgpview API
+                const response = await fetch(`https://api.bgpview.io/search?query=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch ASN information');
+                }
+
+                const data = await response.json();
+
+                if (data.status === 'ok' && data.data && data.data.asns && data.data.asns.length > 0) {
+                    const asn = data.data.asns[0];
+                    await displayASNInfo(asn.asn);
+                } else if (data.status === 'ok' && data.data && data.data.ipv4_prefixes && data.data.ipv4_prefixes.length > 0) {
+                    // If searching by IP, get the ASN from the result
+                    const prefix = data.data.ipv4_prefixes[0];
+                    await displayASNInfo(prefix.asn);
+                } else {
+                    showError('No ASN or IP address found. Please try another search.');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Unable to fetch ASN information. Please check your input and try again.');
+            }
+        }
+
+        async function displayASNInfo(asn) {
+            try {
+                // Fetch detailed ASN information
+                const response = await fetch(`https://api.bgpview.io/asn/${asn}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch ASN details');
+                }
+
+                const data = response.json();
+                data.then(asnData => {
+                    if (asnData.status === 'ok' && asnData.data) {
+                        const asnInfo = asnData.data;
+
+                        // Display main ASN
+                        document.getElementById('resultASN').textContent = `AS${asnInfo.asn}`;
+
+                        // Display details
+                        document.getElementById('orgName').textContent = asnInfo.name || 'Not available';
+                        document.getElementById('country').textContent = asnInfo.country_code || 'Not available';
+                        document.getElementById('rir').textContent = asnInfo.rir_allocation?.rir_name || 'Not available';
+                        document.getElementById('status').textContent = asnInfo.rir_allocation?.status || 'Not available';
+                        document.getElementById('lastUpdated').textContent = asnInfo.rir_allocation?.date_allocated ? new Date(asnInfo.rir_allocation.date_allocated).toLocaleDateString() : 'Not available';
+
+                        // Display IP ranges
+                        if (asnInfo.prefixes && asnInfo.prefixes.length > 0) {
+                            const ipv4Prefixes = asnInfo.prefixes.filter(p => p.prefix && p.prefix.includes('.'));
+                            if (ipv4Prefixes.length > 0) {
+                                const ipRangesContainer = document.getElementById('ipRangesContainer');
+                                const ipRangesDiv = document.getElementById('ipRanges');
+                                ipRangesDiv.innerHTML = '';
+                                
+                                ipv4Prefixes.slice(0, 50).forEach(prefix => {
+                                    const item = document.createElement('div');
+                                    item.className = 'ip-range-item';
+                                    item.textContent = prefix.prefix;
+                                    ipRangesDiv.appendChild(item);
+                                });
+
+                                if (ipv4Prefixes.length > 50) {
+                                    const moreItem = document.createElement('div');
+                                    moreItem.className = 'ip-range-item';
+                                    moreItem.textContent = `... and ${ipv4Prefixes.length - 50} more prefixes`;
+                                    ipRangesDiv.appendChild(moreItem);
+                                }
+
+                                ipRangesContainer.style.display = 'block';
+                            }
+                        }
+
+                        showResults();
+                        hideLoading();
+                        clearError();
+                    }
+                }).catch(err => {
+                    showError('Unable to parse ASN information');
+                    hideLoading();
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Unable to fetch detailed ASN information. Please try again.');
+                hideLoading();
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showResults() {
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('details').classList.add('show');
+        }
+
+        function clearResults() {
+            document.getElementById('resultBox').classList.remove('show');
+            document.getElementById('details').classList.remove('show');
+            document.getElementById('ipRangesContainer').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '⚠️ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        function clearError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        // Allow Enter key to search
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchInput').focus();
+        });
+    </script>
+</body>
+</html>
