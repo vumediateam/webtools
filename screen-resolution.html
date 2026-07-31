@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Resolution Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #5568d3;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .resolution-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            text-align: center;
+        }
+
+        .resolution-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .resolution-display {
+            font-size: 42px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            line-height: 1.2;
+        }
+
+        .resolution-subtext {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 12px;
+        }
+
+        .details {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .info-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .info-card-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .info-card-value {
+            font-size: 18px;
+            color: #333;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .refresh-btn {
+            display: block;
+            margin-top: 25px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        .visual-display {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .screen-preview {
+            background: #333;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            display: inline-block;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .screen-preview-label {
+            font-size: 10px;
+            color: #999;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .resolution-display {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        
+        <h1>Screen Resolution</h1>
+        <p class="subtitle">View your display and device information</p>
+
+        <div class="resolution-box">
+            <div class="resolution-label">Screen Resolution</div>
+            <div class="resolution-display" id="resolution">-</div>
+            <div class="resolution-subtext" id="resolutionSubtext">Loading...</div>
+        </div>
+
+        <div class="details">
+            <div class="detail-item">
+                <span class="detail-label">Screen Width:</span>
+                <span class="detail-value" id="screenWidth">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Screen Height:</span>
+                <span class="detail-value" id="screenHeight">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Available Width:</span>
+                <span class="detail-value" id="availWidth">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Available Height:</span>
+                <span class="detail-value" id="availHeight">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Device Pixel Ratio:</span>
+                <span class="detail-value" id="pixelRatio">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Color Depth:</span>
+                <span class="detail-value" id="colorDepth">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Pixel Depth:</span>
+                <span class="detail-value" id="pixelDepth">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Orientation:</span>
+                <span class="detail-value" id="orientation">-</span>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="info-card-label">Aspect Ratio</div>
+                <div class="info-card-value" id="aspectRatio">-</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">Total Pixels</div>
+                <div class="info-card-value" id="totalPixels">-</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">DPI (Est.)</div>
+                <div class="info-card-value" id="dpi">-</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">Window Size</div>
+                <div class="info-card-value" id="windowSize">-</div>
+            </div>
+        </div>
+
+        <div class="visual-display">
+            <div class="screen-preview" id="screenPreview">
+                Resolution Loading...
+            </div>
+            <div class="screen-preview-label">Visual Representation</div>
+        </div>
+
+        <button class="refresh-btn" onclick="updateResolution()">Refresh Resolution</button>
+    </div>
+
+    <script>
+        function updateResolution() {
+            const screenWidth = window.screen.width;
+            const screenHeight = window.screen.height;
+            const availWidth = window.screen.availWidth;
+            const availHeight = window.screen.availHeight;
+            const pixelRatio = window.devicePixelRatio || 1;
+            const colorDepth = window.screen.colorDepth;
+            const pixelDepth = window.screen.pixelDepth;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // Main resolution display
+            document.getElementById('resolution').textContent = `${screenWidth} × ${screenHeight}`;
+            
+            // Determine if portrait or landscape
+            const orientation = screenWidth > screenHeight ? 'Landscape' : 'Portrait';
+            const resolutionSubtext = `${orientation} - ${getResolutionType(screenWidth, screenHeight)}`;
+            document.getElementById('resolutionSubtext').textContent = resolutionSubtext;
+
+            // Details
+            document.getElementById('screenWidth').textContent = screenWidth + ' px';
+            document.getElementById('screenHeight').textContent = screenHeight + ' px';
+            document.getElementById('availWidth').textContent = availWidth + ' px';
+            document.getElementById('availHeight').textContent = availHeight + ' px';
+            document.getElementById('pixelRatio').textContent = pixelRatio + 'x';
+            document.getElementById('colorDepth').textContent = colorDepth + ' bits';
+            document.getElementById('pixelDepth').textContent = pixelDepth + ' bits';
+            document.getElementById('orientation').textContent = orientation;
+
+            // Calculate aspect ratio
+            const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+            const divisor = gcd(screenWidth, screenHeight);
+            const aspectRatio = `${screenWidth / divisor}:${screenHeight / divisor}`;
+            document.getElementById('aspectRatio').textContent = aspectRatio;
+
+            // Total pixels
+            const totalPixels = screenWidth * screenHeight;
+            document.getElementById('totalPixels').textContent = formatNumber(totalPixels);
+
+            // Estimated DPI
+            const dpi = Math.round(Math.sqrt(screenWidth * screenWidth + screenHeight * screenHeight) / 15.6 * 25.4);
+            document.getElementById('dpi').textContent = dpi + ' dpi';
+
+            // Window size
+            document.getElementById('windowSize').textContent = windowWidth + ' × ' + windowHeight;
+
+            // Visual preview
+            updateVisualPreview(screenWidth, screenHeight, availWidth, availHeight);
+        }
+
+        function getResolutionType(width, height) {
+            const minDim = Math.min(width, height);
+            const maxDim = Math.max(width, height);
+
+            if (minDim >= 1920) return '4K or Higher';
+            if (minDim >= 1440) return '2K/QHD';
+            if (minDim >= 1080) return 'Full HD';
+            if (minDim >= 768) return 'HD';
+            if (minDim >= 480) return 'Mobile';
+            return 'Small Display';
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        function updateVisualPreview(width, height, availWidth, availHeight) {
+            const scale = Math.min(100 / width, 100 / height);
+            const previewWidth = Math.round(width * scale);
+            const previewHeight = Math.round(height * scale);
+            const taskbarHeight = Math.round((height - availHeight) * scale);
+
+            const preview = document.getElementById('screenPreview');
+            preview.style.width = previewWidth + 'px';
+            preview.style.height = previewHeight + 'px';
+            
+            let html = `<div style="text-align: center;">`;
+            html += `<div style="margin-bottom: 4px; font-size: 10px;">${width}×${height}</div>`;
+            
+            if (taskbarHeight > 0) {
+                const contentHeight = previewHeight - taskbarHeight;
+                html += `<div style="height: ${contentHeight}px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 2px; margin-bottom: 2px;"></div>`;
+                html += `<div style="height: ${taskbarHeight}px; background: #555; border-radius: 1px;"></div>`;
+            } else {
+                html += `<div style="height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 2px;"></div>`;
+            }
+            
+            html += `</div>`;
+            preview.innerHTML = html;
+        }
+
+        // Update on page load
+        window.addEventListener('load', updateResolution);
+
+        // Update on resize
+        window.addEventListener('resize', updateResolution);
+
+        // Update on orientation change
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateResolution, 100);
+        });
+    </script>
+</body>
+</html>

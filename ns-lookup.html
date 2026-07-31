@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Lookup Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: #5568d3;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .result-domain {
+            font-size: 24px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        .records-section {
+            display: none;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .records-section.show {
+            display: block;
+        }
+
+        .record-type {
+            margin-bottom: 25px;
+        }
+
+        .record-type-header {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #10b981;
+        }
+
+        .record-item {
+            background: #f9fafb;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #333;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .record-item.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .info-text {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            color: #333;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Dashboard</a>
+        
+        <h1>NS Lookup Tool</h1>
+        <p class="subtitle">Query DNS records for any domain</p>
+
+        <div class="info-text">
+            💡 Enter a domain name to look up DNS records including A, AAAA, MX, CNAME, TXT, and NS records.
+        </div>
+
+        <div class="search-box">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="Enter domain name (e.g., example.com)..." 
+                onkeypress="if(event.key === 'Enter') lookupDNS()"
+            >
+            <button class="search-btn" onclick="lookupDNS()">Lookup</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Looking up DNS records...</p>
+        </div>
+
+        <div class="result-box" id="resultBox">
+            <div class="result-label">Domain</div>
+            <div class="result-domain" id="resultDomain">-</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('all')">All Records</button>
+            <button class="tab-btn" onclick="switchTab('a')">A Records</button>
+            <button class="tab-btn" onclick="switchTab('aaaa')">AAAA Records</button>
+            <button class="tab-btn" onclick="switchTab('mx')">MX Records</button>
+            <button class="tab-btn" onclick="switchTab('ns')">NS Records</button>
+            <button class="tab-btn" onclick="switchTab('txt')">TXT Records</button>
+            <button class="tab-btn" onclick="switchTab('cname')">CNAME Records</button>
+        </div>
+
+        <div class="records-section" id="allRecords">
+            <div class="record-type" id="aRecords">
+                <div class="record-type-header">A Records (IPv4)</div>
+                <div id="aRecordsContent"></div>
+            </div>
+            <div class="record-type" id="aaaaRecords">
+                <div class="record-type-header">AAAA Records (IPv6)</div>
+                <div id="aaaaRecordsContent"></div>
+            </div>
+            <div class="record-type" id="mxRecords">
+                <div class="record-type-header">MX Records (Mail)</div>
+                <div id="mxRecordsContent"></div>
+            </div>
+            <div class="record-type" id="nsRecords">
+                <div class="record-type-header">NS Records (Nameservers)</div>
+                <div id="nsRecordsContent"></div>
+            </div>
+            <div class="record-type" id="txtRecords">
+                <div class="record-type-header">TXT Records</div>
+                <div id="txtRecordsContent"></div>
+            </div>
+            <div class="record-type" id="cnameRecords">
+                <div class="record-type-header">CNAME Records</div>
+                <div id="cnameRecordsContent"></div>
+            </div>
+        </div>
+
+        <div id="aTab" class="tab-content">
+            <div class="record-type">
+                <div class="record-type-header">A Records (IPv4)</div>
+                <div id="aTabContent"></div>
+            </div>
+        </div>
+
+        <div id="aaaaTab" class="tab-content">
+            <div class="record-type">
+                <div class="record-type-header">AAAA Records (IPv6)</div>
+                <div id="aaaaTabContent"></div>
+            </div>
+        </div>
+
+        <div id="mxTab" class="tab-content">
+            <div class="record-type">
+                <div class="record-type-header">MX Records (Mail)</div>
+                <div id="mxTabContent"></div>
+            </div>
+        </div>
+
+        <div id="nsTab" class="tab-content">
+            <div class="record-type">
+                <div class="record-type-header">NS Records (Nameservers)</div>
+                <div id="nsTabContent"></div>
+            </div>
+        </div>
+
+        <div id="txtTab" class="tab-content">
+            <div class="record-type">
+                <div class="record-type-header">TXT Records</div>
+                <div id="txtTabContent"></div>
+            </div>
+        </div>
+
+        <div id="cnameTab" class="tab-content">
+            <div class="record-type">
+                <div class="record-type-header">CNAME Records</div>
+                <div id="cnameTabContent"></div>
+            </div>
+        </div>
+
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        async function lookupDNS() {
+            const searchInput = document.getElementById('searchInput');
+            const domain = searchInput.value.trim();
+
+            if (!domain) {
+                showError('Please enter a domain name');
+                return;
+            }
+
+            showLoading();
+            clearResults();
+
+            try {
+                // Use Google DNS API
+                const response = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=ANY`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch DNS records');
+                }
+
+                const data = await response.json();
+
+                if (data.Answer) {
+                    displayDNSResults(domain, data.Answer);
+                } else {
+                    showError('No DNS records found for this domain');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Unable to fetch DNS records. Please check your domain and try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayDNSResults(domain, answers) {
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultDomain').textContent = domain;
+            document.getElementById('allRecords').classList.add('show');
+
+            // Organize records by type
+            const records = {
+                A: [],
+                AAAA: [],
+                MX: [],
+                NS: [],
+                TXT: [],
+                CNAME: []
+            };
+
+            answers.forEach(answer => {
+                const type = answer.type === 1 ? 'A' : 
+                             answer.type === 28 ? 'AAAA' :
+                             answer.type === 15 ? 'MX' :
+                             answer.type === 2 ? 'NS' :
+                             answer.type === 16 ? 'TXT' :
+                             answer.type === 5 ? 'CNAME' : null;
+
+                if (type && records[type]) {
+                    records[type].push(answer.data);
+                }
+            });
+
+            // Display A Records
+            displayRecordType('aRecords', 'aRecordsContent', records.A);
+            displayRecordType('aTabContent', 'aTabContent', records.A);
+
+            // Display AAAA Records
+            displayRecordType('aaaaRecords', 'aaaaRecordsContent', records.AAAA);
+            displayRecordType('aaaaTabContent', 'aaaaTabContent', records.AAAA);
+
+            // Display MX Records
+            displayRecordType('mxRecords', 'mxRecordsContent', records.MX);
+            displayRecordType('mxTabContent', 'mxTabContent', records.MX);
+
+            // Display NS Records
+            displayRecordType('nsRecords', 'nsRecordsContent', records.NS);
+            displayRecordType('nsTabContent', 'nsTabContent', records.NS);
+
+            // Display TXT Records
+            displayRecordType('txtRecords', 'txtRecordsContent', records.TXT);
+            displayRecordType('txtTabContent', 'txtTabContent', records.TXT);
+
+            // Display CNAME Records
+            displayRecordType('cnameRecords', 'cnameRecordsContent', records.CNAME);
+            displayRecordType('cnameTabContent', 'cnameTabContent', records.CNAME);
+
+            clearError();
+        }
+
+        function displayRecordType(sectionId, contentId, records) {
+            const section = document.getElementById(sectionId);
+            const content = document.getElementById(contentId);
+            
+            if (!section) return;
+
+            if (records.length === 0) {
+                section.style.display = 'none';
+                if (content) content.innerHTML = '<div class="record-item empty">No records found</div>';
+            } else {
+                section.style.display = 'block';
+                if (content) {
+                    content.innerHTML = records.map(record => `<div class="record-item">${record}</div>`).join('');
+                }
+            }
+        }
+
+        function switchTab(tab) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab + 'Records').classList.add('active');
+            
+            if (tab !== 'all') {
+                document.getElementById(tab + 'Tab').classList.add('active');
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function clearResults() {
+            document.getElementById('resultBox').classList.remove('show');
+            document.getElementById('allRecords').classList.remove('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '⚠️ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        function clearError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        // Focus on input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchInput').focus();
+        });
+    </script>
+</body>
+</html>
