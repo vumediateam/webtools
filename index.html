@@ -45,9 +45,11 @@
 
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-auto-rows: minmax(300px, auto);
             gap: 30px;
             margin-bottom: 40px;
+            grid-auto-flow: dense;
         }
 
         .tool-card {
@@ -60,9 +62,68 @@
             flex-direction: column;
         }
 
+        .tool-card:nth-child(1) {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .tool-card:nth-child(2) {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .tool-card:nth-child(3) {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .tool-card:nth-child(n+4) {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
         .tool-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            .tool-card:nth-child(2) {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+
+            .tool-card:nth-child(3) {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .tools-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-auto-rows: minmax(280px, auto);
+            }
+
+            .tool-card:nth-child(1) {
+                grid-column: span 2;
+                grid-row: span 2;
+            }
+
+            .tool-card:nth-child(2) {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+
+            .tool-card:nth-child(3) {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+
+            .tool-card:nth-child(n+4) {
+                grid-column: span 2;
+                grid-row: span 1;
+            }
         }
 
         .tool-icon-box {
