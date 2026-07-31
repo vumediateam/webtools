@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is My IP Address</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .ip-box {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .ip-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .ip-address {
+            font-size: 32px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .details {
+            text-align: left;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .detail-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .refresh-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>What is My IP Address?</h1>
+        <p class="subtitle">Find your IPv4 and IPv6 addresses</p>
+
+        <div class="ip-box" id="ipBox">
+            <div class="loading"></div>
+        </div>
+
+        <div class="details" id="details" style="display: none;">
+            <div class="detail-item">
+                <span class="detail-label">IPv4 Address:</span>
+                <span class="detail-value" id="ipv4">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">IPv6 Address:</span>
+                <span class="detail-value" id="ipv6">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">ISP:</span>
+                <span class="detail-value" id="isp">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">City:</span>
+                <span class="detail-value" id="city">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Country:</span>
+                <span class="detail-value" id="country">-</span>
+            </div>
+        </div>
+
+        <div id="error"></div>
+
+        <button class="refresh-btn" onclick="fetchIPAddress()">Refresh</button>
+    </div>
+
+    <script>
+        async function fetchIPAddress() {
+            const ipBox = document.getElementById('ipBox');
+            const details = document.getElementById('details');
+            const errorDiv = document.getElementById('error');
+
+            ipBox.innerHTML = '<div class="loading"></div>';
+            details.style.display = 'none';
+            errorDiv.innerHTML = '';
+
+            try {
+                let ipv4 = 'Not available';
+                let ipv6 = 'Not available';
+                let isp = 'Not available';
+                let city = 'Not available';
+                let country = 'Not available';
+
+                // Try to fetch IP address from ipify
+                try {
+                    const ipResponse = await fetch('https://api.ipify.org?format=json');
+                    if (ipResponse.ok) {
+                        const ipData = await ipResponse.json();
+                        ipv4 = ipData.ip || 'Not available';
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch from ipify:', e);
+                }
+
+                // Try to fetch geolocation and additional info from geolocation-db
+                try {
+                    const geoResponse = await fetch('https://geolocation-db.com/json/');
+                    if (geoResponse.ok) {
+                        const geoData = await geoResponse.json();
+                        ipv4 = geoData.IPv4 || ipv4;
+                        city = geoData.city || 'Not available';
+                        country = geoData.country_name || 'Not available';
+                        isp = geoData.isp || 'Not available';
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch from geolocation-db:', e);
+                }
+
+                // Update display
+                document.getElementById('ipv4').textContent = ipv4;
+                document.getElementById('ipv6').textContent = ipv6;
+                document.getElementById('isp').textContent = isp;
+                document.getElementById('city').textContent = city;
+                document.getElementById('country').textContent = country;
+
+                // Update the main green box
+                ipBox.innerHTML = `
+                    <div class="ip-label">Your IP Address</div>
+                    <div class="ip-address">${ipv4}</div>
+                `;
+
+                details.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                ipBox.innerHTML = '<div class="ip-label">Error Loading</div>';
+                errorDiv.innerHTML = `<div class="error">⚠️ Unable to fetch IP address. Please check your internet connection and try again.</div>`;
+            }
+        }
+
+        // Fetch IP address when page loads
+        window.addEventListener('load', fetchIPAddress);
+    </script>
+</body>
+</html>
