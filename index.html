@@ -45,9 +45,10 @@
 
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
+            auto-flow: dense;
         }
 
         .tool-card {
@@ -60,66 +61,14 @@
             flex-direction: column;
         }
 
-        .tool-card:nth-child(1) {
-            grid-column: span 1;
-            grid-row: span 1;
-        }
-
-        .tool-card:nth-child(2) {
-            grid-column: span 1;
-            grid-row: span 1;
-        }
-
-        .tool-card:nth-child(3) {
-            grid-column: span 1;
-            grid-row: span 1;
-        }
-
-        .tool-card:nth-child(n+4) {
-            grid-column: span 1;
-            grid-row: span 1;
-        }
-
         .tool-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
         }
 
-        @media (min-width: 768px) {
-            .tool-card:nth-child(2) {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-
-            .tool-card:nth-child(3) {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-        }
-
         @media (min-width: 1200px) {
             .tools-grid {
                 grid-template-columns: repeat(3, 1fr);
-            }
-
-            .tool-card:nth-child(1) {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-
-            .tool-card:nth-child(2) {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-
-            .tool-card:nth-child(3) {
-                grid-column: span 1;
-                grid-row: span 1;
-            }
-
-            .tool-card:nth-child(n+4) {
-                grid-column: span 1;
-                grid-row: span 1;
             }
         }
 
@@ -190,7 +139,43 @@
             margin-top: 40px;
         }
 
-        @media (max-width: 768px) {
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .no-results {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            font-size: 16px;
+        }
+
+        .tool-card.hidden {
+            display: none;
+        }
             .header h1 {
                 font-size: 32px;
             }
@@ -215,6 +200,20 @@
         <div class="header">
             <h1>🛠️ Web Tools Dashboard</h1>
             <p>A collection of useful online tools for everyday tasks</p>
+        </div>
+
+        <div class="search-box">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="🔍 Search tools by name or description..." 
+                oninput="filterTools(this.value)"
+            >
+        </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            No tools found matching your search. Try different keywords.
         </div>
 
         <div class="tools-grid">
@@ -307,5 +306,33 @@
             <p>© 2026 Web Tools Dashboard | All tools run locally in your browser</p>
         </div>
     </div>
+
+    <script>
+        function filterTools(searchQuery) {
+            const query = searchQuery.toLowerCase().trim();
+            const toolCards = document.querySelectorAll('.tool-card');
+            let visibleCount = 0;
+
+            toolCards.forEach(card => {
+                const title = card.querySelector('.tool-title').textContent.toLowerCase();
+                const description = card.querySelector('.tool-description').textContent.toLowerCase();
+
+                if (title.includes(query) || description.includes(query) || query === '') {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Show or hide "no results" message
+            const noResults = document.getElementById('noResults');
+            if (visibleCount === 0 && query !== '') {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
