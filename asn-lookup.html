@@ -343,22 +343,19 @@
 
         async function lookupASNByIP(ip) {
             try {
-                // ipinfo.io free tier: HTTPS + CORS enabled, returns "org": "AS8486 Some Org"
-                const response = await fetch(`https://ipinfo.io/${ip}/json`);
+                // RIPEstat: HTTPS + CORS enabled, no API key required
+                const response = await fetch(`https://stat.ripe.net/data/network-info/data.json?resource=${ip}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to lookup IP');
                 }
 
                 const data = await response.json();
+                const asns = data?.data?.asns;
 
-                if (data.org) {
-                    // org field looks like "AS8486 Cloudflare, Inc."
-                    const match = data.org.match(/^AS(\d+)/);
-                    if (match) {
-                        await displayASNInfoDirect(match[1]);
-                        return;
-                    }
+                if (asns && asns.length > 0) {
+                    await displayASNInfoDirect(asns[0]);
+                    return;
                 }
 
                 showError('No ASN found for this IP address');
@@ -373,28 +370,31 @@
 
         async function displayASNInfoDirect(asn) {
             try {
-                // BGPView: HTTPS + CORS enabled, dedicated ASN endpoint
-                const response = await fetch(`https://api.bgpview.io/asn/${asn}`);
+                // RIPEstat: HTTPS + CORS enabled, no API key required
+                const response = await fetch(`https://stat.ripe.net/data/as-overview/data.json?resource=AS${asn}`);
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch ASN details');
                 }
 
                 const result = await response.json();
+                const data = result?.data;
 
-                if (result.status === 'ok' && result.data) {
-                    const data = result.data;
-
+                if (data && data.holder) {
                     // Display main ASN
                     document.getElementById('resultASN').textContent = `AS${asn}`;
 
-                    // Display details
-                    document.getElementById('orgName').textContent = data.name || data.description_short || 'Not available';
-                    document.getElementById('country').textContent = data.country_code || 'Not available';
-                    document.getElementById('rir').textContent = data.rir_allocation?.rir_name || 'Not available';
-                    document.getElementById('status').textContent = 'Active';
-                    document.getElementById('lastUpdated').textContent = data.rir_allocation?.date_allocated
-                        ? new Date(data.rir_allocation.date_allocated).toLocaleDateString()
+                    // "holder" is typically formatted like "GOOGLE, US"
+                    const holderParts = (data.holder || '').split(',');
+                    const orgName = holderParts[0]?.trim() || 'Not available';
+                    const countryGuess = holderParts.length > 1 ? holderParts[holderParts.length - 1].trim() : 'Not available';
+
+                    document.getElementById('orgName').textContent = orgName;
+                    document.getElementById('country').textContent = countryGuess;
+                    document.getElementById('rir').textContent = 'See RIPEstat for RIR details';
+                    document.getElementById('status').textContent = data.announced ? 'Announced' : 'Not currently announced';
+                    document.getElementById('lastUpdated').textContent = result.query_time
+                        ? new Date(result.query_time).toLocaleDateString()
                         : new Date().toLocaleDateString();
 
                     // Fetch and display prefixes (IP ranges)
@@ -420,11 +420,11 @@
             list.innerHTML = '';
 
             try {
-                const response = await fetch(`https://api.bgpview.io/asn/${asn}/prefixes`);
+                const response = await fetch(`https://stat.ripe.net/data/announced-prefixes/data.json?resource=AS${asn}`);
                 if (!response.ok) throw new Error('Failed to fetch prefixes');
 
                 const result = await response.json();
-                const prefixes = result.data?.ipv4_prefixes || [];
+                const prefixes = (result?.data?.prefixes || []).filter(p => p.prefix && p.prefix.indexOf(':') === -1);
 
                 if (prefixes.length === 0) {
                     container.style.display = 'none';
@@ -434,7 +434,7 @@
                 prefixes.slice(0, 50).forEach(p => {
                     const item = document.createElement('div');
                     item.className = 'ip-range-item';
-                    item.textContent = `${p.prefix}${p.name ? ' — ' + p.name : ''}`;
+                    item.textContent = p.prefix;
                     list.appendChild(item);
                 });
 
