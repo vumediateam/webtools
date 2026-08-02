@@ -8,13 +8,7 @@ Web Tools Dashboard is a single-page application featuring multiple utilities de
 
 ## 🛠️ Available Tools
 
-### 1. **ASN Lookup**
-- Look up Autonomous System Numbers (ASN)
-- Search by ASN number or IP address
-- View organization details, country information, and ISP data
-- Supports both IPv4 and IPv6
-
-### 2. **NS Lookup (DNS Records)**
+### 1. **NS Lookup (DNS Records)**
 - Query DNS records for any domain
 - View A, AAAA, MX, NS, CNAME, and TXT records
 - Tab-based navigation for filtering by record type
